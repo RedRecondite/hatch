@@ -126,7 +126,7 @@ original.save('extracted.png')
 python hatch.py encode input.png output.png \
     -f "1,12,3" \
     -d "16,24" \
-    -hb "-8,-12,8,4" \
+    -hb=-8,-12,8,4 \
     -fd 75 \
     -s
 ```
@@ -136,7 +136,8 @@ python hatch.py encode input.png output.png \
 - `output`: Output path (will be saved as PNG)
 - `-f, --frames`: Comma-separated frame numbers (e.g., "1,12,3")
 - `-d, --depth-dot`: Depth dot coordinates as "x,y"
-- `-hb, --hardbox`: Hardbox in dink.ini format "left_x,top_y,right_x,bottom_y" (signed offsets from depth dot, e.g., "-14,-9,14,10")
+- `-hb, --hardbox`: Hardbox in dink.ini format "left_x,top_y,right_x,bottom_y" (signed offsets from depth dot)
+  - **Important**: Use `=` syntax for negative values: `-hb=-14,-9,14,10` (not `-hb -14,-9,14,10`)
 - `-fd, --frame-delay`: Optional frame delay value
 - `-s, --special`: Flag for special frame (adds red border)
 

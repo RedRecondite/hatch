@@ -591,7 +591,7 @@ def main():
     encode_parser.add_argument('output', help='Output image path (PNG format)')
     encode_parser.add_argument('-f', '--frames', required=True, help='Frame numbers (comma-separated, e.g., "1,12,3")')
     encode_parser.add_argument('-d', '--depth-dot', required=True, help='Depth dot coordinates (x,y)')
-    encode_parser.add_argument('-hb', '--hardbox', required=True, help='Hardbox in dink.ini format (left_x,top_y,right_x,bottom_y, e.g., "-14,-9,14,10")')
+    encode_parser.add_argument('-hb', '--hardbox', required=True, help='Hardbox in dink.ini format (left_x,top_y,right_x,bottom_y). Use -hb=-14,-9,14,10 for negative values')
     encode_parser.add_argument('-fd', '--frame-delay', type=int, help='Frame delay value')
     encode_parser.add_argument('-s', '--special', action='store_true', help='Special frame flag')
     

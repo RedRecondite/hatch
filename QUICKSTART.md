@@ -23,9 +23,11 @@
 python hatch.py encode sprite.png output.png \
     -f "1,5,10" \
     -d "16,24" \
-    -hb "-8,-12,8,4"
+    -hb=-8,-12,8,4
 ```
-(Note: hardbox uses dink.ini format with signed offsets: left_x,top_y,right_x,bottom_y)
+**Note**:
+- Hardbox uses dink.ini format with signed offsets: `left_x,top_y,right_x,bottom_y`
+- Use `=` syntax for negative values: `-hb=-14,-9,14,10`
 
 ### Decode a DUCK image:
 ```bash
