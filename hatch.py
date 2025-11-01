@@ -591,7 +591,7 @@ def main():
     encode_parser.add_argument('output', help='Output image path (PNG format)')
     encode_parser.add_argument('-f', '--frames', required=True, help='Frame numbers (comma-separated, e.g., "1,12,3")')
     encode_parser.add_argument('-d', '--depth-dot', required=True, help='Depth dot coordinates (x,y)')
-    encode_parser.add_argument('-hb', '--hardbox', required=True, help='Hardbox (left,right,top,bottom relative to depth dot)')
+    encode_parser.add_argument('-hb', '--hardbox', required=True, help='Hardbox in dink.ini format (left_x,top_y,right_x,bottom_y). Use -hb=-14,-9,14,10 for negative values')
     encode_parser.add_argument('-fd', '--frame-delay', type=int, help='Frame delay value')
     encode_parser.add_argument('-s', '--special', action='store_true', help='Special frame flag')
     
@@ -614,7 +614,13 @@ def main():
         try:
             frame_numbers = [int(f.strip()) for f in args.frames.split(',')]
             dx, dy = map(int, args.depth_dot.split(','))
-            hb_left, hb_right, hb_top, hb_bottom = map(int, args.hardbox.split(','))
+            # Parse hardbox in dink.ini format: left_x,top_y,right_x,bottom_y
+            # Convert to internal format: left,right,top,bottom (positive distances)
+            left_x, top_y, right_x, bottom_y = map(int, args.hardbox.split(','))
+            hb_left = -left_x  # distance to left edge
+            hb_top = -top_y    # distance to top edge
+            hb_right = right_x  # distance to right edge
+            hb_bottom = bottom_y  # distance to bottom edge
         except Exception as e:
             print(f"Error parsing arguments: {e}", file=sys.stderr)
             return 1
@@ -646,11 +652,19 @@ def main():
         # Decode
         try:
             metadata = decode(duck_image)
-            
+
+            # Convert hardbox from internal format to dink.ini format
+            hb_left, hb_right, hb_top, hb_bottom = metadata['hardbox']
+            left_x = -hb_left
+            top_y = -hb_top
+            right_x = hb_right
+            bottom_y = hb_bottom
+            hardbox_dink_format = f"{left_x},{top_y},{right_x},{bottom_y}"
+
             print("DUCK Image Metadata:")
             print(f"  Frame Numbers: {', '.join(map(str, metadata['frame_numbers']))}")
             print(f"  Depth Dot: {metadata['depth_dot']}")
-            print(f"  Hardbox: {metadata['hardbox']}")
+            print(f"  Hardbox (dink.ini format): {hardbox_dink_format}")
             print(f"  Frame Delay: {metadata['frame_delay']}")
             print(f"  Special: {metadata['special']}")
             

@@ -62,8 +62,10 @@ Frame numbers and delay encoded using 3x3 pixel font:
 
 **Coordinate System**:
 - Depth dot: Absolute coordinates relative to image top-left
-- Hardbox: Relative to depth dot (left, right, top, bottom)
-  - Example: depth_dot=(16,24), hardbox=(8,8,12,4)
+- Hardbox: Uses dink.ini format (left_x, top_y, right_x, bottom_y) - signed offsets from depth dot
+  - Example: depth_dot=(16,24), hardbox=(-8,-12,8,4)
+  - Negative values indicate offset to the left/top of depth dot
+  - Positive values indicate offset to the right/bottom of depth dot
   - Actual bounds: x:[8,24], y:[12,28]
 
 ## Python API Usage
@@ -78,11 +80,13 @@ import hatch
 sprite = Image.open('my_sprite.png')
 
 # Encode with metadata
+# Note: Python API uses internal format (left, right, top, bottom) - positive distances
+# CLI uses dink.ini format (left_x, top_y, right_x, bottom_y) - signed offsets
 duck = hatch.encode(
     image=sprite,
     frame_numbers=[1, 5, 10],    # List of frame numbers
     depth_dot=(16, 24),           # (x, y) coordinates
-    hardbox=(8, 8, 12, 4),        # (left, right, top, bottom) relative to depth dot
+    hardbox=(8, 8, 12, 4),        # Internal format: (left, right, top, bottom) - positive distances
     frame_delay=75,               # Optional frame delay (omit if None)
     special=False                 # Special frame flag
 )
@@ -122,7 +126,7 @@ original.save('extracted.png')
 python hatch.py encode input.png output.png \
     -f "1,12,3" \
     -d "16,24" \
-    -hb "8,8,12,4" \
+    -hb=-8,-12,8,4 \
     -fd 75 \
     -s
 ```
@@ -132,7 +136,8 @@ python hatch.py encode input.png output.png \
 - `output`: Output path (will be saved as PNG)
 - `-f, --frames`: Comma-separated frame numbers (e.g., "1,12,3")
 - `-d, --depth-dot`: Depth dot coordinates as "x,y"
-- `-hb, --hardbox`: Hardbox as "left,right,top,bottom" (relative to depth dot)
+- `-hb, --hardbox`: Hardbox in dink.ini format "left_x,top_y,right_x,bottom_y" (signed offsets from depth dot)
+  - **Important**: Use `=` syntax for negative values: `-hb=-14,-9,14,10` (not `-hb -14,-9,14,10`)
 - `-fd, --frame-delay`: Optional frame delay value
 - `-s, --special`: Flag for special frame (adds red border)
 
@@ -159,7 +164,7 @@ duck = hatch.encode(
     sprite,
     frame_numbers=[42],
     depth_dot=(16, 30),
-    hardbox=(10, 10, 20, 8),
+    hardbox=(10, 10, 20, 8),  # Internal format: (left, right, top, bottom) distances
     special=False
 )
 duck.save('hero_walk_1_duck.png')
@@ -192,15 +197,23 @@ duck = hatch.encode(
 
 ## Understanding Coordinates
 
-For a 32x32 sprite with:
-- **Depth dot at (16, 24)**: Center-bottom area
-- **Hardbox (8, 8, 12, 4)**: 
-  - Left edge: 16 - 8 = pixel 8
-  - Right edge: 16 + 8 = pixel 24
-  - Top edge: 24 - 12 = pixel 12  
-  - Bottom edge: 24 + 4 = pixel 28
+### Dink.ini Format (CLI)
+For a 32x32 sprite with depth dot at (16, 24) and hardbox in dink.ini format: `-8,-12,8,4`
+
+The signed offsets mean:
+- **left_x = -8**: Left edge at 16 + (-8) = pixel 8
+- **top_y = -12**: Top edge at 24 + (-12) = pixel 12
+- **right_x = 8**: Right edge at 16 + 8 = pixel 24
+- **bottom_y = 4**: Bottom edge at 24 + 4 = pixel 28
 
 The hardbox creates a collision area from (8,12) to (24,28).
+
+### Internal Format (Python API)
+The same hardbox in the Python API uses positive distances: `(8, 8, 12, 4)` representing:
+- Left distance: 8 pixels
+- Right distance: 8 pixels
+- Top distance: 12 pixels
+- Bottom distance: 4 pixels
 
 ## Format Validation
 

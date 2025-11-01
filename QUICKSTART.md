@@ -23,8 +23,11 @@
 python hatch.py encode sprite.png output.png \
     -f "1,5,10" \
     -d "16,24" \
-    -hb "8,8,12,4"
+    -hb=-8,-12,8,4
 ```
+**Note**:
+- Hardbox uses dink.ini format with signed offsets: `left_x,top_y,right_x,bottom_y`
+- Use `=` syntax for negative values: `-hb=-14,-9,14,10`
 
 ### Decode a DUCK image:
 ```bash
@@ -73,7 +76,10 @@ With delay = `[1, 12, 3]` and `frame_delay=50`
 The "center point" for collision/positioning: `(x, y)` coordinates
 
 ### Hardbox
-Collision box relative to depth dot: `(left, right, top, bottom)`
+**CLI**: Uses dink.ini format `(left_x, top_y, right_x, bottom_y)` - signed offsets from depth dot
+- Example: `(-8, -12, 8, 4)` means left edge at -8, top at -12, right at +8, bottom at +4
+
+**Python API**: Uses internal format `(left, right, top, bottom)` - positive distances
 - Example: `(8, 8, 12, 4)` creates box 8px left, 8px right, 12px up, 4px down from depth dot
 
 ### Special Frames
